@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1f6feb" />
+  <meta name="description" content="무료 개인 영어 단어장 PWA" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="icon" href="./icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="stylesheet" href="./style.css" />
+  <title>내 영어 단어장</title>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div>
+        <h1 id="page-title">내 단어장</h1>
+        <p id="page-subtitle" class="muted">저장된 단어를 확인하세요.</p>
+      </div>
+      <button id="install-btn" class="icon-btn hidden" type="button" aria-label="앱 설치">설치</button>
+    </header>
+
+    <main class="content">
+      <section id="view-vocab" class="view active" aria-labelledby="page-title">
+        <div class="toolbar-card">
+          <div class="count-line"><strong id="word-count">0</strong>개 저장됨</div>
+          <label class="sr-only" for="vocab-search">단어장 검색</label>
+          <input id="vocab-search" class="input" type="search" placeholder="영어 단어 또는 한국어 뜻 검색" autocomplete="off" />
+          <div class="row gap-sm">
+            <label class="sr-only" for="sort-select">정렬</label>
+            <select id="sort-select" class="input select">
+              <option value="newest">최근 저장순</option>
+              <option value="oldest">오래된 순</option>
+              <option value="alphabetical">알파벳순</option>
+            </select>
+            <button id="settings-toggle" class="btn btn-secondary" type="button">관리</button>
+          </div>
+        </div>
+
+        <div id="manage-panel" class="panel hidden">
+          <h2>단어장 관리</h2>
+          <div class="stack gap-sm">
+            <button id="backup-btn" class="btn btn-secondary" type="button">📤 단어장 백업</button>
+            <label class="btn btn-secondary file-label" for="restore-file">📥 단어장 복원</label>
+            <input id="restore-file" type="file" accept="application/json,.json" hidden />
+            <button id="delete-all-btn" class="btn btn-danger" type="button">🗑 전체 단어 삭제</button>
+          </div>
+          <p class="help">로그인 없이 이 기기에 저장됩니다. 휴대폰 변경·브라우저 데이터 삭제에 대비해 백업을 권장합니다.</p>
+        </div>
+
+        <div id="vocab-list" class="card-list" aria-live="polite"></div>
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">📚</div>
+          <p>저장된 단어가 없습니다.</p>
+          <button id="empty-add-btn" class="btn btn-primary" type="button">첫 단어 추가하기</button>
+        </div>
+      </section>
+
+      <section id="view-add" class="view" aria-labelledby="page-title">
+        <form id="search-form" class="toolbar-card" autocomplete="off">
+          <label for="word-input" class="field-label">영어 단어</label>
+          <div class="search-row">
+            <input id="word-input" class="input" type="text" inputmode="text" placeholder="예: pleasure" aria-describedby="search-note" />
+            <button id="search-btn" class="btn btn-primary" type="submit">검색</button>
+          </div>
+          <p id="search-note" class="help">무료 공개 사전에서 영어 뜻·품사·예문을 찾습니다. 한국어 뜻과 해석은 직접 입력할 수 있습니다.</p>
+        </form>
+
+        <div id="status-box" class="status hidden" role="status" aria-live="polite"></div>
+
+        <section id="result-section" class="hidden">
+          <div class="word-hero card">
+            <div class="word-title-row">
+              <div>
+                <div class="word-line">
+                  <h2 id="result-word" class="word-title"></h2>
+                  <button id="speak-word-btn" class="speak-btn" type="button" aria-label="단어 발음 듣기">🔊</button>
+                </div>
+                <div id="result-ipa" class="ipa"></div>
+                <div id="ipa-note" class="tiny muted"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="choices-card" class="card">
+            <h3>품사와 뜻 선택</h3>
+            <p class="help">여러 품사·뜻이 있으면 저장할 내용을 선택하세요. 선택 후 아래 입력란을 자유롭게 수정할 수 있습니다.</p>
+            <div id="meaning-choices" class="choice-list"></div>
+          </div>
+
+          <div class="card edit-card">
+            <h3>저장할 내용</h3>
+            <label class="field-label" for="edit-word">영어 단어</label>
+            <input id="edit-word" class="input" type="text" />
+
+            <label class="field-label" for="edit-ipa">IPA</label>
+            <input id="edit-ipa" class="input" type="text" placeholder="없으면 직접 입력 가능" />
+
+            <label class="field-label" for="edit-pos">품사</label>
+            <input id="edit-pos" class="input" type="text" placeholder="예: noun" />
+
+            <label class="field-label" for="edit-en-meaning">영어 뜻</label>
+            <textarea id="edit-en-meaning" class="input textarea" rows="4"></textarea>
+
+            <label class="field-label" for="edit-ko-meaning">한국어 뜻</label>
+            <textarea id="edit-ko-meaning" class="input textarea" rows="3" placeholder="예: 기쁨, 즐거움"></textarea>
+
+            <label class="field-label" for="edit-example">영어 예문</label>
+            <div class="inline-field">
+              <textarea id="edit-example" class="input textarea" rows="3"></textarea>
+              <button id="speak-example-btn" class="speak-btn inline-speak" type="button" aria-label="예문 발음 듣기">🔊</button>
+            </div>
+
+            <label class="field-label" for="edit-translation">예문 해석</label>
+            <textarea id="edit-translation" class="input textarea" rows="3" placeholder="예문 해석을 직접 입력하세요"></textarea>
+
+            <button id="save-word-btn" class="btn btn-primary full" type="button">⭐ 내 단어장에 저장</button>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <nav class="bottom-nav" aria-label="주요 메뉴">
+      <button class="nav-btn active" data-view="vocab" type="button"><span>📚</span><span>단어장</span></button>
+      <button class="nav-btn" data-view="add" type="button"><span>➕</span><span>새 단어</span></button>
+    </nav>
+  </div>
+
+  <dialog id="edit-dialog" class="dialog">
+    <form method="dialog" id="edit-form" class="dialog-card">
+      <div class="dialog-head">
+        <h2>단어 수정</h2>
+        <button class="icon-btn" value="cancel" aria-label="닫기">✕</button>
+      </div>
+      <input id="dialog-id" type="hidden" />
+      <label class="field-label" for="dialog-word">영어 단어</label>
+      <input id="dialog-word" class="input" type="text" />
+      <label class="field-label" for="dialog-ipa">IPA</label>
+      <input id="dialog-ipa" class="input" type="text" />
+      <label class="field-label" for="dialog-pos">품사</label>
+      <input id="dialog-pos" class="input" type="text" />
+      <label class="field-label" for="dialog-en">영어 뜻</label>
+      <textarea id="dialog-en" class="input textarea" rows="4"></textarea>
+      <label class="field-label" for="dialog-ko">한국어 뜻</label>
+      <textarea id="dialog-ko" class="input textarea" rows="3"></textarea>
+      <label class="field-label" for="dialog-example">영어 예문</label>
+      <textarea id="dialog-example" class="input textarea" rows="3"></textarea>
+      <label class="field-label" for="dialog-translation">예문 해석</label>
+      <textarea id="dialog-translation" class="input textarea" rows="3"></textarea>
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" value="cancel">취소</button>
+        <button id="dialog-save" class="btn btn-primary" value="default">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
