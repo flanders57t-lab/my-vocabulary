@@ -1,76 +1,66 @@
-# 내 영어 단어장 PWA
+# 내 영어 단어장 PWA v3 — 여러 품사 지원
 
-로그인, API Key, 백엔드 서버 없이 사용하는 개인 영어 단어장입니다.
+개인용 영어 단어장 PWA입니다. 로그인, API Key, 백엔드 서버, 외부 사전 서비스가 필요하지 않습니다.
 
-## 주요 기능
+## v3 핵심 변경점
+- IPA(발음기호) 입력란 완전 제거
+- 한 영어 단어에 품사를 여러 개 추가 가능
+- 각 품사마다 다음 항목을 독립적으로 입력
+  - 품사
+  - 한국어 뜻
+  - 영어 예문
+  - 예문 해석
+- 각 예문마다 🔊 읽기 버튼 제공
+- 단어 자체도 🔊 읽기 가능
+- 기존 v2 단어 데이터는 앱 시작 시 자동으로 `품사 1개` 구조로 마이그레이션
+- v1/v2 백업 JSON도 복원 시 새 구조로 변환 가능
+
+## 예시
+`present` 하나를 저장하고 그 안에 다음처럼 여러 품사를 둘 수 있습니다.
+
+- 명사 → 선물 → This is a present for you. → 이것은 너를 위한 선물이야.
+- 형용사 → 참석한 → All members are present. → 모든 구성원이 참석해 있다.
+- 동사 → 발표하다 → She presented her idea. → 그녀는 자신의 생각을 발표했다.
+
+## 기존 기능
 - 📚 내 단어장 / ➕ 새 단어 화면 전환
-- 무료 공개 사전(Free Dictionary API)로 영어 뜻·품사·일부 예문·발음기호 검색
-- 여러 품사·여러 뜻 선택
-- 한국어 뜻·예문 해석 직접 입력 및 수정
-- Web Speech API로 미국식 영어 음성(en-US 우선) 읽기
-- IndexedDB에 스마트폰 내부 저장
-- 검색, 정렬, 수정, 삭제
+- Web Speech API로 영어 단어/예문 읽기(en-US 우선)
+- IndexedDB에 기기 내부 저장
+- 단어·품사·뜻·예문·해석 검색
+- 최근 저장순 / 오래된 순 / 알파벳순 정렬
+- 수정 / 개별 삭제 / 전체 삭제
 - JSON 백업 / 복원
-- PWA 설치 및 오프라인 단어장 사용
+- PWA 설치 / 오프라인 사용
 
-## 무료 사전
-- 서비스: Free Dictionary API
-- 공식 사이트: https://dictionaryapi.dev/
-- 기본 엔드포인트: https://api.dictionaryapi.dev/api/v2/entries/en/<word>
-- API Key가 필요 없습니다.
-- 이 앱은 한국어 번역 API를 사용하지 않습니다. 한국어 뜻과 예문 해석은 직접 입력합니다.
-- 브라우저나 네트워크 환경에서 외부 API 요청이 차단되면 자동 검색은 실패할 수 있습니다. 이 경우 앱은 직접 입력 화면을 열어 저장할 수 있게 합니다.
+## GitHub Pages 업데이트
+기존 `my-vocabulary` 저장소와 GitHub Pages 주소를 그대로 사용하면 됩니다.
 
-## PC에서 테스트
-PWA와 ES 모듈은 `file://`로 직접 열지 말고 로컬 웹서버로 실행하세요.
+1. 현재 단어가 중요하면 먼저 앱의 `관리 → 단어장 백업`을 실행합니다.
+2. 이 ZIP을 PC에서 압축 해제합니다.
+3. GitHub의 기존 `my-vocabulary` 저장소에서 `Add file → Upload files`를 엽니다.
+4. 압축을 푼 폴더 안 파일들을 저장소 루트에 업로드합니다.
+5. 같은 이름 파일은 새 파일로 교체됩니다.
+6. `Commit changes`를 누릅니다.
+7. GitHub Pages 재배포 후 기존 주소를 새로고침합니다.
+8. 설치된 PWA는 완전히 닫았다가 다시 열면 새 Service Worker가 적용됩니다.
 
-Python이 있다면 이 폴더에서:
+`dictionary.js`는 v2부터 이미 사용하지 않으며 v3에도 없습니다. 저장소에 예전 `dictionary.js`가 남아 있어도 실행되지 않지만 삭제해도 됩니다.
 
-```bash
-python -m http.server 8080
-```
+## 기존 단어 데이터
+같은 GitHub Pages 주소를 유지하면 브라우저 IndexedDB는 그대로 유지됩니다.
+앱이 처음 열릴 때 기존 단일 품사 데이터를 새 `senses` 배열 구조로 자동 변환합니다.
 
-그 뒤 브라우저에서 `http://localhost:8080`을 여세요.
+예전 데이터:
+- partOfSpeech
+- koreanMeaning
+- example
+- exampleTranslation
 
-## Android 스마트폰에서 PWA로 설치
-스마트폰에서 PWA로 설치하려면 이 폴더를 **HTTPS로 서비스**해야 합니다. 가장 쉬운 무료 방법 중 하나는 GitHub Pages입니다.
+새 데이터:
+- senses[0].partOfSpeech
+- senses[0].meaning
+- senses[0].example
+- senses[0].translation
 
-### 방법 A: GitHub Pages
-1. GitHub 계정을 만들거나 로그인합니다.
-2. 새 저장소(repository)를 만듭니다. 예: `my-vocabulary`.
-3. 이 ZIP을 풀고 폴더 안 파일 전체를 저장소 루트에 업로드합니다.
-4. GitHub 저장소의 `Settings` → `Pages`로 이동합니다.
-5. `Build and deployment`에서 `Deploy from a branch`를 선택합니다.
-6. Branch를 `main`, 폴더를 `/(root)`로 선택하고 저장합니다.
-7. 잠시 후 표시되는 `https://...github.io/.../` 주소를 Galaxy 스마트폰의 Chrome으로 엽니다.
-8. Chrome 메뉴(⋮)에서 `홈 화면에 추가` 또는 `앱 설치`를 선택합니다.
-9. 설치 후 홈 화면 아이콘으로 실행하면 standalone 앱처럼 사용할 수 있습니다.
-
-GitHub UI 문구는 시점에 따라 조금 달라질 수 있습니다. 핵심은 이 정적 파일들을 HTTPS 주소로 서비스하는 것입니다.
-
-### 방법 B: 다른 무료 정적 호스팅
-Cloudflare Pages, Netlify 등 HTTPS를 제공하는 정적 호스팅에 같은 파일을 올려도 됩니다. 서버 코드는 필요 없습니다.
-
-## 데이터 저장 위치
-단어는 브라우저의 IndexedDB에 저장됩니다. 로그인이나 클라우드 동기화는 없습니다.
-
-따라서 다음 경우 데이터가 사라질 수 있습니다.
-- Chrome 사이트 데이터 삭제
-- 앱/브라우저 초기화
-- 휴대폰 교체
-
-정기적으로 `📤 단어장 백업`을 눌러 JSON 파일을 보관하세요.
-
-## 백업/복원
-- 백업: `관리` → `📤 단어장 백업`
-- 복원: `관리` → `📥 단어장 복원` → JSON 선택
-- 복원은 기존 단어를 유지하고 새 단어만 병합합니다.
-
-## 사전 서비스를 교체하려면
-`dictionary.js`의 `API_BASE`와 `getWordData()`를 수정하면 됩니다. 나머지 UI/저장 로직과 분리되어 있습니다.
-
-## 자동 제공하지 않는 부분
-- 한국어 뜻 자동 번역
-- 한국어 예문 자동 번역
-
-무료·무제한·API Key 없는 안정적인 번역 서비스를 강제로 연결하지 않았습니다. 잘못된 번역을 자동 저장하는 대신 직접 입력·수정하게 설계했습니다.
+## 백업 권장
+브라우저 데이터 삭제나 휴대폰 교체에 대비해 정기적으로 JSON 백업을 해 두는 것을 권장합니다.

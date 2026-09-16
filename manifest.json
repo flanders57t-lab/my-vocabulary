@@ -1,7 +1,7 @@
 {
   "name": "내 영어 단어장",
   "short_name": "영어단어장",
-  "description": "로그인 없이 사용하는 무료 개인 영어 단어장 PWA",
+  "description": "한 단어에 여러 품사를 묶어 뜻·예문·해석을 저장하는 개인 영어 단어장 PWA",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
